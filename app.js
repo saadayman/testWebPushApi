@@ -80,6 +80,7 @@ app.get('/send',async(req,res,next)=>{
 
 webpush.setVapidDetails('mailto:sa467563@gmail.com',keys.publicKey,keys.privateKey)
 webpush.sendNotification(push[0],JSON.stringify(payload))
+res.json('push notification sent')
 })
 
 
