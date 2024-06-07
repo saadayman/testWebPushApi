@@ -60,28 +60,38 @@ app.post('/save/push',async(req,res,next)=>{
 
 })
 
-app.get('/send',async(req,res,next)=>{
+app.get('/send', async (req, res) => {
     const keys = {
-    publicKey: 'BOncXD2WECeZZs8Q14-0lY-12G7xgsSUyEDUocPGtmFfUeYQADWIhD1tIwtHqdgGYnNckNKZZtN_GZsNkc9lStg',
-    privateKey: 'A0U6-hhsqTiI-4lXsS77kIUgsPK7-C9LXUbekz8Wltg'
-}
-    const payload = {
-        "notification":{
-            "data":{
-                "url":"https://google.com",
-                "message":"Hello"
-            },
-            "title":"saads",
-            // "vibrate":[100,50,100]
-        }
-    }
-   const id = new  mongoose.Schema.ObjectId(req.query.id)
-   const push = await  pushModel.find({_id:id })
+        publicKey: 'BOncXD2WECeZZs8Q14-0lY-12G7xgsSUyEDUocPGtmFfUeYQADWIhD1tIwtHqdgGYnNckNKZZtN_GZsNkc9lStg',
+        privateKey: 'A0U6-hhsqTiI-4lXsS77kIUgsPK7-C9LXUbekz8Wltg'
+    };
 
-webpush.setVapidDetails('mailto:sa467563@gmail.com',keys.publicKey,keys.privateKey)
-webpush.sendNotification(push[0],JSON.stringify(payload))
-res.json('push notification sent')
-})
+    const payload = {
+        notification: {
+            data: {
+                url: "https://google.com",
+                message: "Hello"
+            },
+            title: "saads",
+        }
+    };
+
+    try {
+        const id = new mongoose.Types.ObjectId(req.query.id);
+        const pushSubscription = await pushModel.findOne({ _id: id });
+
+        if (!pushSubscription) {
+            return res.status(404).json('No subscription found for the given ID');
+        }
+
+        webpush.setVapidDetails('mailto:sa467563@gmail.com', keys.publicKey, keys.privateKey);
+        await webpush.sendNotification(pushSubscription, JSON.stringify(payload));
+        res.json('Push notification sent successfully');
+    } catch (error) {
+        console.error('Error sending notification:', error);
+        res.status(500).json('Failed to send push notification');
+    }
+});
 
 app.get('/users',async(req,res,next)=>{
    const users = await  pushModel.find({})
