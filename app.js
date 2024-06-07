@@ -2,7 +2,7 @@
 import  webpush from 'web-push'
 // console.log(webpush.generateVAPIDKeys())
 import  express from 'express'
-import * as mongoose from 'mongoose'
+import mongoose from 'mongoose'
 import cors from 'cors'
 
 const app = express()
@@ -75,12 +75,16 @@ app.get('/send',async(req,res,next)=>{
             // "vibrate":[100,50,100]
         }
     }
-
-   const push = await  pushModel.find({})
+   const id = new  mongoose.Schema.ObjectId(req.query.id)
+   const push = await  pushModel.find({_id:id })
 
 webpush.setVapidDetails('mailto:sa467563@gmail.com',keys.publicKey,keys.privateKey)
 webpush.sendNotification(push[0],JSON.stringify(payload))
 res.json('push notification sent')
 })
 
+app.get('/users',async(req,res,next)=>{
+   const users = await  pushModel.find({})
+res.json(users)
+})
 
