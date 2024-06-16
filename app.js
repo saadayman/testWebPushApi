@@ -65,14 +65,18 @@ app.get('/send', async (req, res) => {
         publicKey: 'BOncXD2WECeZZs8Q14-0lY-12G7xgsSUyEDUocPGtmFfUeYQADWIhD1tIwtHqdgGYnNckNKZZtN_GZsNkc9lStg',
         privateKey: 'A0U6-hhsqTiI-4lXsS77kIUgsPK7-C9LXUbekz8Wltg'
     };
-
+    let req_body =      {
+        data: {
+            url: "https://google.com",
+            message: "Hello"
+        },
+        title: "saads"}
+    if(req.body){
+        req_body = req.body
+    }
     const payload = {
         notification: {
-            data: {
-                url: "https://google.com",
-                message: "Hello"
-            },
-            title: "saads",
+      ...req_body
         }
     };
 
@@ -85,11 +89,17 @@ app.get('/send', async (req, res) => {
         }
 
         webpush.setVapidDetails('mailto:sa467563@gmail.com', keys.publicKey, keys.privateKey);
-        await webpush.sendNotification(pushSubscription, JSON.stringify(payload));
-        res.json('Push notification sent successfully');
+        const res_details = await webpush.sendNotification(pushSubscription, JSON.stringify(payload));
+        res.json({
+            msg:'Push Notification has been sent.',
+            res:res_details
+        });
     } catch (error) {
         console.error('Error sending notification:', error);
-        res.status(500).json('Failed to send push notification');
+        res.status(500).json({
+            msg:'Failed to send push notification',
+            error:error.message
+        });
     }
 });
 
